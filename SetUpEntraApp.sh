@@ -356,7 +356,7 @@ function Add-RequiredResourceAccess() {
 
     rras+=("$rra")
 
-    requiredResourceAccess =("${rras[@]}")
+    requiredResourceAccess=("${rras[@]}")
 
     local str=$(echo "${app.requiredResourceAccess[@]}" | jq -c . | tr -d '\r\n' | sed 's/"/\\"/g')
 
