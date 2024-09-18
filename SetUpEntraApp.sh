@@ -1,17 +1,5 @@
-# Create a hash algorithm for SHA256
-hashAlgorithm=$(openssl dgst -sha256)
-
-# Construct the raw application display name
-RawAppDisplayName="$AZURE_SUBSCRIPTION_ID$AZURE_ENV_NAME$AZURE_LOCATION"
-    
-# Compute the hash of the raw application display name
-HashedAppDisplayName=$(echo -n "$RawAppDisplayName" | $hashAlgorithm | awk '{print $2}')
-    
-# Convert the hashed value to base64 and take the first 13 characters
-uniqueString=$(echo "$HashedAppDisplayName" | xxd -r -p | base64 | cut -c1-13)
-    
 # Create the final application display name
-AppDisplayName="Split Experimentation - Quote of the Day - $uniqueString"
+AppDisplayName="Split Experimentation"
 
 SplitResourceProviderApplicationId = "d3e90440-4ec9-4e8b-878b-c89e889e9fbc"
 
@@ -261,16 +249,16 @@ function Add-ApiScope() {
 
     local permission
     permission=$(cat <<EOF
-{
-    "adminConsentDescription": "Allows access to the split experimentation workspace",
-    "adminConsentDisplayName": "Split Experimentation Access",
-    "isEnabled": true,
-    "id": "$permissionId",
-    "type": "Admin",
-    "userConsentDescription": "Allows access to the split experimentation workspace",
-    "userConsentDisplayName": "Split Experimentation Access",
-    "value": "user_impersonation"
-}
+    {
+        "adminConsentDescription": "Allows access to the split experimentation workspace",
+        "adminConsentDisplayName": "Split Experimentation Access",
+        "isEnabled": true,
+        "id": "$permissionId",
+        "type": "Admin",
+        "userConsentDescription": "Allows access to the split experimentation workspace",
+        "userConsentDisplayName": "Split Experimentation Access",
+        "value": "user_impersonation"
+    }
 EOF
 )
 
