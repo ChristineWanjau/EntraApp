@@ -363,7 +363,7 @@ function Add-RequiredResourceAccess() {
     az ad app update --id "$objectId" --set "requiredResourceAccess=$str"
 }
 
-function get_split_app() {
+function Get-SplitApp() {
     apps=$(az ad app list --display-name "$AppDisplayName" | jq -c '.')
     
     if [ $(echo "$apps" | jq 'length') -eq 0 ]; then
@@ -373,7 +373,7 @@ function get_split_app() {
     echo "$apps" | jq '.[0]'
 }
 
-function get_split_sp() {
+function Get-SplitSp() {
     sps=$(az ad sp list --display-name "$AppDisplayName" | jq -c '.')
     
     if [ $(echo "$sps" | jq 'length') -eq 0 ]; then
@@ -383,13 +383,13 @@ function get_split_sp() {
     echo "$sps" | jq '.[0]'
 }
 
-function get_app_role_assignments() {
+function  Get-AppRoleAssignments() {
     local tenantId=$1
     local appObjectId=$2
     az rest --method GET --uri "https://graph.windows.net/$tenantId/servicePrincipals/$appObjectId/appRoleAssignments?api-version=1.6" | jq .
 }
 
-function add_app_role_assignment() {
+function Add-AppRoleAssignment() {
     local tenantId=$1
     local appObjectId=$2
     local appRoleId=$3
@@ -399,7 +399,7 @@ function add_app_role_assignment() {
     az rest --method post --uri "https://graph.windows.net/$tenantId/servicePrincipals/$appObjectId/appRoleAssignments?api-version=1.6" --body "$BODY" --headers "Content-type=application/json"
 }
 
-function confirm_is_owner() {
+function Confirm-IsOwner() {
     local appObjectId=$1
     local userObjectId=$2
     local owners=$(az ad app owner list --id $appObjectId | jq .)
