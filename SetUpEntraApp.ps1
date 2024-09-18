@@ -1,12 +1,4 @@
-$hashAlgorithm = [System.Security.Cryptography.HashAlgorithm]::Create('SHA256')
-
-$RawAppDisplayName = "$env:AZURE_SUBSCRIPTION_ID$env:AZURE_ENV_NAME$env:AZURE_LOCATION"
-
-$HashedAppDisplayName = $hashAlgorithm.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($RawAppDisplayName))
-
-$uniqueString = [System.Convert]::ToBase64String($HashedAppDisplayName).Substring(0, 13)
-
-$AppDisplayName = "Split Experimentation - $uniqueString"
+$AppDisplayName = "Split Experimentation"
 
 $SplitResourceProviderApplicationId = "d3e90440-4ec9-4e8b-878b-c89e889e9fbc"
 
