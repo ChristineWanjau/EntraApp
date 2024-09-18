@@ -1,9 +1,9 @@
 # Create the final application display name
 AppDisplayName="Split Experimentation"
 
-SplitResourceProviderApplicationId = "d3e90440-4ec9-4e8b-878b-c89e889e9fbc"
+SplitResourceProviderApplicationId="d3e90440-4ec9-4e8b-878b-c89e889e9fbc"
 
-AzureCliApplicationId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46"
+AzureCliApplicationId="04b07795-8ddb-461a-bbee-02f9e1bf7b46"
 
 
 function Setup-SplitExperimentationEntraApp() {
