@@ -263,6 +263,7 @@ EOF
 )
 
     local permissions=()
+    local scopes=app.api.oauth2PermissionScopes
 
     for perm in "${app.api.oauth2PermissionScopes[@]}"; do
         permissions+=("$perm")
@@ -270,7 +271,7 @@ EOF
 
     permissions+=("$permission")
 
-    app.api.oauth2PermissionScopes=("${permissions[@]}")
+    scopes=("${permissions[@]}")
 
     local str
     str=$(echo "${app.api}" | jq -c . | tr -d '\r\n' | sed 's/"/\\"/g')
@@ -290,6 +291,7 @@ function Preauthorize_SplitResourceProvider() {
     )
 
     local preauthorizations=()
+    local preAuthorizedApplications=app.api.preAuthorizedApplications
 
     for item in "${app.api.preAuthorizedApplications[@]}"; do
         preauthorizations+=("$item")
@@ -297,7 +299,7 @@ function Preauthorize_SplitResourceProvider() {
 
     preauthorizations+=("${rpPreauthorization[@]}")
 
-    app.api.preAuthorizedApplications=("${preauthorizations[@]}")
+    preAuthorizedApplications=("${preauthorizations[@]}")
 
     local str=$(echo "${app.api}" | jq -c . | tr -d '\r\n' | sed 's/"/\\"/g')
 
@@ -316,6 +318,7 @@ function Preauthorize_AzureCli() {
     )
 
     local preauthorizations=()
+    local preAuthorizedApplications=app.api.preAuthorizedApplications
 
     for item in "${app.api.preAuthorizedApplications[@]}"; do
         preauthorizations+=("$item")
@@ -323,7 +326,7 @@ function Preauthorize_AzureCli() {
 
     preauthorizations+=("${cliPreauthorization[@]}")
 
-    app.api.preAuthorizedApplications=("${preauthorizations[@]}")
+    preAuthorizedApplications=("${preauthorizations[@]}")
 
     local str=$(echo "${app.api}" | jq -c . | sed 's/\r//g; s/\n//g; s/"/\\\"/g')
 
@@ -345,6 +348,7 @@ function Add-RequiredResourceAccess() {
     }'
 
     local rras=()
+    local requiredResourceAccess=app.requiredResourceAccess
 
     for item in "${app.requiredResourceAccess[@]}"; do
         rras+=("$item")
@@ -352,7 +356,7 @@ function Add-RequiredResourceAccess() {
 
     rras+=("$rra")
 
-    app.requiredResourceAccess=("${rras[@]}")
+    requiredResourceAccess =("${rras[@]}")
 
     local str=$(echo "${app.requiredResourceAccess[@]}" | jq -c . | tr -d '\r\n' | sed 's/"/\\"/g')
 
