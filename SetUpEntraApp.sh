@@ -3,7 +3,7 @@ UserObjectId=$1
 TenantId=$2
 
 # Create the final application display name
-AppDisplayName="Split Experimentation -express provisioning test"
+AppDisplayName="Split Experimentation -express provisioning test1"
 
 SplitResourceProviderApplicationId="d3e90440-4ec9-4e8b-878b-c89e889e9fbc"
 
@@ -398,8 +398,6 @@ function Get-ManagedIdentityObjectId() {
 }
 
 function Grant-GraphApiPermission() {
-    identityId=$1
-    echo "${identityId}"
     managedIdentityObjectId='e1ed6e2c-f380-4334-b7f5-3eaf210ca9de'
     tenantId='72f988bf-86f1-41af-91ab-2d7cd011db47'
 
@@ -412,12 +410,9 @@ function Grant-GraphApiPermission() {
     graphApiAppRoleId=$(jq -r '.appRoleId' <<< "$graphApiApplication")
 
     # Assign the role to the managed identity.
-    requestBody=$(jq -n \
-                    --arg id "$graphApiAppRoleId" \
-                    --arg principalId "$managedIdentityObjectId" \
-                    --arg resourceId "$graphServicePrincipalObjectId" \
-                    '{id: $id, principalId: $principalId, resourceId: $resourceId}' )
-    az rest -m post -u "https://graph.windows.net/$tenantId/servicePrincipals/$managedIdentityObjectId/appRoleAssignments?api-version=1.6" -b "$requestBody"
+    az rest --method patch \
+    --url https://graph.windows.net/$tenantId/servicePrincipals/$managedIdentityObjectId/appRoleAssignments?api-version=1.6 \
+    --body "{'id': '$graphApiAppRoleId', 'principalId': '$managedIdentityObjectId', 'resourceId': '$graphServicePrincipalObjectId'}"
 }
 
 Setup-SplitExperimentationEntraApp
