@@ -1,3 +1,7 @@
+#!/bin/bash
+UserObjectId=$1
+TenantId=$2
+
 # Create the final application display name
 AppDisplayName="Split Experimentation -express provisioning test"
 
@@ -396,7 +400,7 @@ function Get-ManagedIdentityObjectId() {
 function Grant-GraphApiPermission() {
     identityId=$1
     echo "${identityId}"
-    managedIdentityObjectId="e1ed6e2c-f380-4334-b7f5-3eaf210ca9de"
+    managedIdentityObjectId='e1ed6e2c-f380-4334-b7f5-3eaf210ca9de'
     tenantId='72f988bf-86f1-41af-91ab-2d7cd011db47'
 
     graphAppId='00000003-0000-0000-c000-000000000000' # This is a well-known Microsoft Graph application ID.
