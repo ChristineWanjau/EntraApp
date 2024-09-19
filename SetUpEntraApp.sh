@@ -251,7 +251,7 @@ EOF
     az ad app update --id "$objectId" --set api="$str"
 }
 
-function Preauthorize_SplitResourceProvider() {
+function Preauthorize-SplitResourceProvider() {
     local objectId=$1
     local permissionId=$2
 
@@ -278,7 +278,7 @@ function Preauthorize_SplitResourceProvider() {
     az ad app update --id "$objectId" --set "api=$str"
 }
 
-function Preauthorize_AzureCli() {
+function Preauthorize-AzureCli() {
     local objectId=$1
     local permissionId=$2
 
@@ -394,8 +394,9 @@ function Get-ManagedIdentityObjectId() {
 }
 
 function Grant-GraphApiPermission() {
-    managedIdentityObjectId=$1
-    echo "$managedIdentityObjectId"
+    identityId=$1
+    echo "${!identityId}"
+    managedIdentityObjectId="e1ed6e2c-f380-4334-b7f5-3eaf210ca9de"
     tenantId='72f988bf-86f1-41af-91ab-2d7cd011db47'
 
     graphAppId='00000003-0000-0000-c000-000000000000' # This is a well-known Microsoft Graph application ID.
