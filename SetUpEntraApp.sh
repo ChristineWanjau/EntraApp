@@ -1,10 +1,9 @@
 # Create the final application display name
-AppDisplayName="Split Experimentation"
+AppDisplayName="Split Experimentation -express provisioning"
 
 SplitResourceProviderApplicationId="d3e90440-4ec9-4e8b-878b-c89e889e9fbc"
 
 AzureCliApplicationId="04b07795-8ddb-461a-bbee-02f9e1bf7b46"
-
 
 function Setup-SplitExperimentationEntraApp() {
     ###########
@@ -17,7 +16,9 @@ function Setup-SplitExperimentationEntraApp() {
         az login
     fi
 
-    userObjectId=$(az ad signed-in-user show | jq -r .id)
+    managedIdentityObjectId=$(Get-ManagedIdentityObjectId)
+
+    Grant-GraphApiPermission "$managedIdentityObjectId"
 
     ###########
     ## Get or create app
@@ -66,8 +67,6 @@ function Setup-SplitExperimentationEntraApp() {
     then
         echo "Creating service principal"
 
-        Confirm-IsOwner "$app.id" "$userObjectId"
-
         az ad sp create --id "$app.id"
     fi
 
@@ -82,8 +81,6 @@ function Setup-SplitExperimentationEntraApp() {
     if [ -z "$role" ]
     then
         echo "Creating app role"
-
-        Confirm-IsOwner "$app.id" "$userObjectId"
 
         Add-AppRole "$app.id"
     fi
@@ -104,8 +101,6 @@ function Setup-SplitExperimentationEntraApp() {
     then
         echo "Creating ID URI"
 
-        Confirm-IsOwner "$app.id" "$userObjectId"
-
         az ad app update --id "$app.id" --identifier-uris "api://$app.appId"
     fi
 
@@ -122,7 +117,6 @@ function Setup-SplitExperimentationEntraApp() {
     if [ -z "$perm" ]; then
         echo "Creating API scope"
 
-        Confirm-IsOwner "$app.id" "$userObjectId"
 
         Add-ApiScope "$app.id"
     fi
@@ -139,8 +133,6 @@ function Setup-SplitExperimentationEntraApp() {
 
     if [ -z "$authorization" ]; then
         echo "Setting up Split RP preauthorization for Entra ID token acquisition"
-
-        Confirm-IsOwner "$app.id" "$userObjectId"
 
         perm=$(echo "$app.api.oauth2PermissionScopes" | jq -r '.[] | select(.value == "user_impersonation")')
 
@@ -178,8 +170,6 @@ function Setup-SplitExperimentationEntraApp() {
     if [ $(echo "$app.requiredResourceAccess" | jq 'length') -eq 0 ]; then
         echo "Establishing required resource access"
 
-        Confirm-IsOwner "$app.id" "$userObjectId"
-
         Add-RequiredResourceAccess "$app.id"
     fi
 
@@ -189,25 +179,25 @@ function Setup-SplitExperimentationEntraApp() {
     ## Role assignment
     ###########
 
-    echo "Checking role assignment for experimentation data owner"
+    # echo "Checking role assignment for experimentation data owner"
 
-    sp=$(Get-SplitSp)
+    # sp=$(Get-SplitSp)
 
-    tenantId=$(az account show | jq -r '.tenantId')
+    # tenantId=$(az account show | jq -r '.tenantId')
 
-    appRoleId=$(echo "$app.appRoles" | jq -r '.[] | select(.Value == "ExperimentationDataOwner") | .id')
+    # appRoleId=$(echo "$app.appRoles" | jq -r '.[] | select(.Value == "ExperimentationDataOwner") | .id')
 
-    roleAssignments=$(Get-AppRoleAssignments "$tenantId" "$sp.id")
+    # roleAssignments=$(Get-AppRoleAssignments "$tenantId" "$sp.id")
 
-    roleAssignment=$(echo "$roleAssignments.Value" | jq -r '.[] | select(.id == "'"$appRoleId"'")')
+    # roleAssignment=$(echo "$roleAssignments.Value" | jq -r '.[] | select(.id == "'"$appRoleId"'")')
 
-    if [ -z "$roleAssignment" ]; then
-        echo "Creating role assignment for experimentation data owner"
+    # if [ -z "$roleAssignment" ]; then
+    #     echo "Creating role assignment for experimentation data owner"
 
-        Confirm-IsOwner "$app.id" "$userObjectId"
+    #     Confirm-IsOwner "$app.id" "$userObjectId"
 
-        Add-AppRoleAssignment "$tenantId" "$sp.id" "$appRoleId" "$userObjectId"
-    fi
+    #     Add-AppRoleAssignment "$tenantId" "$sp.id" "$appRoleId" "$userObjectId"
+    # fi
 }
 
 function Add-AppRole() {
@@ -411,6 +401,35 @@ function Confirm-IsOwner() {
         echo "The caller $(echo $u | jq -r .userPrincipalName) is not listed as an owner of the application $appObjectId. Ownership is required to perform setup." >&2
         exit 1
     fi
+}
+
+function Get-AzureTenantId() {
+    az account show --query tenantId
+}
+
+function Get-ManagedIdentityObjectId() {
+    az account show --query user.principalId --output tsv
+}
+
+function Grant-GraphApiPermission() {
+    managedIdentityObjectId=$1
+    tenantId=$(Get-AzureTenantId)
+
+    graphAppId='00000003-0000-0000-c000-000000000000' # This is a well-known Microsoft Graph application ID.
+    graphApiAppRoleName='Application.ReadWrite.All'
+    graphApiApplication=$(az ad sp list --filter "appId eq '$graphAppId'" --query "{ appRoleId: [0] .appRoles [?value=='$graphApiAppRoleName'].id | [0], objectId:[0] .id }" -o json)
+
+    # Get the app role for the Graph API.
+    graphServicePrincipalObjectId=$(jq -r '.objectId' <<< "$graphApiApplication")
+    graphApiAppRoleId=$(jq -r '.appRoleId' <<< "$graphApiApplication")
+
+    # Assign the role to the managed identity.
+    requestBody=$(jq -n \
+                    --arg id "$graphApiAppRoleId" \
+                    --arg principalId "$managedIdentityObjectId" \
+                    --arg resourceId "$graphServicePrincipalObjectId" \
+                    '{id: $id, principalId: $principalId, resourceId: $resourceId}' )
+    az rest -m post -u "https://graph.windows.net/$tenantId/servicePrincipals/$managedIdentityObjectId/appRoleAssignments?api-version=1.6" -b "$requestBody"
 }
 
 Setup-SplitExperimentationEntraApp
