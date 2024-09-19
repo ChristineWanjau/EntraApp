@@ -237,7 +237,7 @@ EOF
     local permissions=()
     local scopes=app.api.oauth2PermissionScopes
 
-    for perm in "${app.api.oauth2PermissionScopes[@]}"; do
+    for perm in "${!scopes[@]}"; do
         permissions+=("$perm")
     done
 
@@ -292,7 +292,7 @@ function Preauthorize_AzureCli() {
     local preauthorizations=()
     local preAuthorizedApplications=app.api.preAuthorizedApplications
 
-    for item in "${app.api.preAuthorizedApplications[@]}"; do
+    for item in "${!app.api.preAuthorizedApplications[@]}"; do
         preauthorizations+=("$item")
     done
 
@@ -300,7 +300,7 @@ function Preauthorize_AzureCli() {
 
     preAuthorizedApplications=("${preauthorizations[@]}")
 
-    local str=$(echo "${app.api}" | jq -c . | sed 's/\r//g; s/\n//g; s/"/\\\"/g')
+    local str=$(echo "${!app.api}" | jq -c . | sed 's/\r//g; s/\n//g; s/"/\\\"/g')
 
     az ad app update --id "$objectId" --set "api=$str"
 }
@@ -395,7 +395,8 @@ function Get-ManagedIdentityObjectId() {
 
 function Grant-GraphApiPermission() {
     managedIdentityObjectId=$1
-    tenantId=$(Get-AzureTenantId)
+    echo "$managedIdentityObjectId"
+    tenantId='72f988bf-86f1-41af-91ab-2d7cd011db47'
 
     graphAppId='00000003-0000-0000-c000-000000000000' # This is a well-known Microsoft Graph application ID.
     graphApiAppRoleName='Application.ReadWrite.All'
