@@ -1,5 +1,5 @@
 # Create the final application display name
-AppDisplayName="Split Experimentation -express provisioning"
+AppDisplayName="Split Experimentation -express provisioning test"
 
 SplitResourceProviderApplicationId="d3e90440-4ec9-4e8b-878b-c89e889e9fbc"
 
