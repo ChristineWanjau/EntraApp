@@ -12,7 +12,7 @@ function Setup-SplitExperimentationEntraApp() {
 
     az account show >/dev/null 2>/dev/null
 
-    if [ $? -ne 0 ]; then
+    if [[ $? -ne 0 ]]; then
         az login
     fi
 
@@ -36,24 +36,6 @@ function Setup-SplitExperimentationEntraApp() {
         app=$(Get-SplitApp)
     fi
 
-    folderPath="./.azure/$AZURE_ENV_NAME"
-    envFile=$(find "$folderPath" -name "*.env" | head -n 1)
-    envVarName="AZURE_SPLIT_ENTRA_APPLICATION_ID"
-    splitEntraAppId=$(echo "$app" | jq -r .appId)
-    envVarLine="$envVarName=\"$splitEntraAppId\""
-
-    # Only add the environment variable if it doesn't already exist with the correct value
-    entraAppIdEnvVarCorrectValue=$(grep -qF "$envVarLine" "$envFile" && echo "true" || echo "false")
-
-    if [ "$entraAppIdEnvVarCorrectValue" = "false" ]; then
-        entraAppIdEnvVarExists=$(grep -qF "$envVarName" "$envFile" && echo "true" || echo "false")
-        
-        if [ "$entraAppIdEnvVarExists" = "true" ]; then
-            grep -v "$envVarName" "$envFile" > temp && mv temp "$envFile"
-        fi
-
-        echo "$envVarLine" >> "$envFile"
-    fi
 
     ###########
     ## Create sp if non-existent
@@ -167,7 +149,7 @@ function Setup-SplitExperimentationEntraApp() {
 
     echo "Checking for required resource access configuration"
 
-    if [ $(echo "$app.requiredResourceAccess" | jq 'length') -eq 0 ]; then
+    if [[ $(echo "$app.requiredResourceAccess" | jq 'length') -eq 0 ]]; then
         echo "Establishing required resource access"
 
         Add-RequiredResourceAccess "$app.id"
@@ -356,7 +338,7 @@ function Add-RequiredResourceAccess() {
 function Get-SplitApp() {
     apps=$(az ad app list --display-name "$AppDisplayName" | jq -c '.')
     
-    if [ $(echo "$apps" | jq 'length') -eq 0 ]; then
+    if [[ $(echo "$apps" | jq 'length') -eq 0 ]]; then
         return
     fi
 
@@ -366,7 +348,7 @@ function Get-SplitApp() {
 function Get-SplitSp() {
     sps=$(az ad sp list --display-name "$AppDisplayName" | jq -c '.')
     
-    if [ $(echo "$sps" | jq 'length') -eq 0 ]; then
+    if [[ $(echo "$sps" | jq 'length') -eq 0 ]]; then
         return
     fi
 
