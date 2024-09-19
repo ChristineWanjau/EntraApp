@@ -395,7 +395,7 @@ function Get-ManagedIdentityObjectId() {
 
 function Grant-GraphApiPermission() {
     identityId=$1
-    echo "${!identityId}"
+    echo "${identityId}"
     managedIdentityObjectId="e1ed6e2c-f380-4334-b7f5-3eaf210ca9de"
     tenantId='72f988bf-86f1-41af-91ab-2d7cd011db47'
 
